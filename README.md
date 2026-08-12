@@ -42,7 +42,7 @@ See [SKILL.md](SKILL.md) for the full rule set, including the boundary-preservat
 
 ## Author
 
-_Add your name or GitHub handle here._
+_FlowFalcon - (Fathur)_
 
 ## License
 

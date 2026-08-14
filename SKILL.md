@@ -1,97 +1,62 @@
 ---
 name: stop-coding-slop
-description: Keep AI-assisted coding correct, proportional, repository-native, and evidence-backed. Use for writing, fixing, refactoring, debugging, and reviewing code, including pull request and diff review, where generated code may overbuild, force abstractions or reuse, invent APIs, leave dead code, use template names, narrate obvious code, ignore real constraints, or claim unverified success. Preserve necessary architecture, security, tests, performance, documentation, and clarity.
-license: MIT
-metadata:
-  trigger: Writing, fixing, refactoring, debugging, or reviewing code in any repository or language
+description: Remove AI-generated coding residue by defining success before editing, inspecting repository evidence, choosing the simplest complete solution, keeping changes surgical, and verifying observable behavior. Use when the user asks for repository-native, non-sloppy, minimal, maintainable code; when implementing, debugging, refactoring, or reviewing a change that may contain speculative abstractions, generic naming, redundant comments, duplicated logic, defensive branches, broad cleanup, invented APIs, or unverified claims; or as a final quality pass on an AI-assisted diff in an existing repository.
 ---
 
 # Stop Coding Slop
 
-Produce complete code that earns its maintenance cost. Do not optimize for fewest lines, smallest diff, or looking human. Remove unjustified complexity without removing necessary behavior.
+Make the change native to the repository because it follows repository evidence—not because it imitates a human style. Optimize for the maintainer who must review, debug, and extend it.
 
-## Priority order
+## Think before coding
 
-Resolve conflicts in this order:
+Do not translate the request directly into the first plausible patch. Inspect the relevant implementation, callers, tests, types, configuration, and nearby conventions before editing. Search for existing behavior before adding it. Trace the path far enough to understand where the behavior belongs and what could break.
 
-1. stated contract and observable correctness;
-2. security, data integrity, lifecycle, and explicit resource constraints;
-3. repository conventions and compatible reuse;
-4. proportional design and maintainability;
-5. stylistic residue such as weak names, obvious comments, and verbose handoff.
+## Define success before implementation
 
-Never sacrifice an earlier priority to improve a later one. Anti-slop discipline never excuses an incomplete implementation, missing required validation, unsafe shortcut, or silent response.
+Form a short internal change contract before choosing code. Establish:
 
-## Work from evidence
+- required observable behavior and meaningful failure behavior;
+- trust, compatibility, scale, and lifecycle constraints;
+- the checks or evidence that will demonstrate success;
+- the smallest set of files that owns the behavior.
 
-Before changing code, inspect the relevant implementation, callers, tests, types, configuration, lockfile, and local conventions when available. Distinguish:
+If success cannot yet be stated in observable terms, keep investigating. Do not use implementation activity to discover the requirement by accident. Keep this reasoning proportional and mostly internal: once the available evidence defines a safe contract, implement it instead of returning a long plan or waiting for unnecessary certainty.
 
-- explicit requirements;
-- facts established by the repository or authoritative documentation;
-- assumptions that materially affect the result;
-- ideas that are merely plausible.
+Treat everything else as a hypothesis. Do not invent repository facts, APIs, import paths, framework types, package behavior, or rationales. If a path or type is missing, keep the provided symbol in scope or state the limitation; never emit a guessed or placeholder import. Ask only when ambiguity changes a public contract, data model, destructive action, security decision, or architecture.
 
-Do not invent repository facts, APIs, package behavior, product rules, or rationales. Verify external names, methods, options, schemas, and versions before relying on them.
+## Prefer the simplest complete shape
 
-Ask one focused question only when the missing choice would change a public contract, data model, destructive action, security decision, or architecture and cannot be inferred safely. Otherwise make the smallest reversible assumption, state it briefly when material, and continue. If blocked by material ambiguity, ask the question in the final response; never return an empty answer.
+Choose the most direct design that satisfies the whole current contract. Simplicity means fewer concepts and less indirection, not merely fewer lines. Add no concept justified only by possible future use.
 
-## Choose proportional scope
+- Reuse code only when validation, output transformation, errors, side effects, transaction, and lifecycle semantics match.
+- Keep distinct semantics separate. A few direct lines are cheaper than a shared helper with flags or hidden behavior changes.
+- Add an abstraction only for a current boundary or repeated variation.
+- Preserve public names and shapes unless the task requires changing them. Improve local names without creating an API migration.
 
-Implement the complete current requirement, including failure behavior and integration implied by the repository. Add a concept only when a current requirement, invariant, repeated pattern, or repository boundary justifies it.
+Do not optimize for fewest lines. Preserve required authorization, validation, transactions, cleanup, backpressure, tests, and error propagation. Validate at the actual boundary; do not add regexes, fallback values, retries, or rejection behavior unrelated to the contract.
 
-Avoid speculative layers, factories, interfaces, option bags, flags, services, helpers, configuration, dependencies, retries, caching, telemetry, and future-proofing. Also avoid false minimalism: do not create a mega-function, local bandage, hand-written security/protocol subsystem, or missing test merely to keep the patch small.
+## Keep changes surgical
 
-Keep changes cohesive. Do not perform unrelated cleanup, formatting, renames, dependency changes, or documentation rewrites. Remove only dead or generated residue introduced or exposed by the requested change when removal is safe and directly connected.
+Change only the files and lines needed to satisfy the contract. Follow the existing ownership and structure instead of reorganizing the codebase around the new change. Before expanding scope, name the current requirement that forces each additional edit.
 
-## Reuse semantics, not names
+Keep the diff cohesive. Omit unrelated cleanup, formatting, renaming, dependencies, compatibility shims, documentation rewrites, and drive-by refactors. When an adjacent flaw blocks the requested behavior, make the smallest enabling correction and keep it visibly tied to the task.
 
-Search for existing implementations before adding helpers or dependencies. Reuse code when its validation, encoding, error, transaction, lifecycle, and data semantics match. Do not force reuse when signed data, error behavior, or another invariant differs. A short separate implementation is better than a shared helper filled with flags for unrelated behavior.
+## Produce the artifact
 
-Prefer installed, established dependencies for security-sensitive or specification-heavy behavior. Do not add a second library when the repository already has a compatible one, and do not hand-roll complex behavior merely to keep dependency count low.
+Complete the requested code, patch, or review before explaining it. A diagnosis, plan, or recommendation is not a substitute for an implementation when implementation was requested.
 
-## Preserve real boundaries
+Catch errors only to recover, translate at a boundary, preserve useful context, or guarantee cleanup. Never turn failure into empty success. Respect stated scale; avoid buffering, unbounded concurrency, leaks, and ignored cancellation.
 
-Treat external input according to the actual threat and contract:
+## Remove generated residue
 
-- parameterize SQL and commands;
-- encode values for their destination context;
-- constrain paths, ranges, sizes, and formats when the operation or stated contract requires it;
-- preserve authentication, authorization, CSRF, signature, and secret-handling boundaries.
+Review the diff as a skeptical maintainer. For every added file, helper, option, branch, validation check, comment, and dependency, name the current requirement it serves. Remove it when there is no concrete answer.
 
-Do not confuse extra validation with extra security. If parameterization or context-correct encoding fully addresses the demonstrated threat, do not add a regex, sanitizer, or new rejection behavior without a contract reason. Conversely, when the contract explicitly requires rejecting malformed or out-of-range input, implement that boundary instead of calling it overengineering.
+Remove comments that narrate code, template local names when domain vocabulary is available, ceremonial headings, feature tours, unsupported examples, alternative implementations, speculative caveats, and dead or placeholder code. Do not compress readable code into clever code. Keep comments for non-obvious invariants, external quirks, compatibility constraints, and deliberate trade-offs. Match the requested artifact; when asked for code only, return code only.
 
-Catch errors only to recover, translate at a boundary, add useful context while preserving the cause, or guarantee cleanup. Do not swallow failures, return fake empty success values, retry without an idempotency and backoff model, or add try/catch ceremony.
+## Verify and report
 
-Respect explicit scale. Avoid whole-input buffering, unbounded concurrency, N+1 I/O, leaks, and ignored backpressure. Do not add caches, batching, concurrency, or micro-optimizations without a current reason.
+Use the repository's existing checks. Test observable behavior and meaningful failure paths; add a regression test for a bug when practical. Do not install a framework for one change, weaken expectations, or replace a failing real test with mock success. Inspect the final diff for accidental scope and incomplete integration.
 
-## Use names for meaning and comments for context
+In review mode, report each independent merge-blocking failure briefly, even when one correction fixes several. Tie it to an observable consequence and the smallest correction. Omit style already enforced by tooling and any claim whose premise is merely “likely,” “probably,” or “might be required.”
 
-Preserve vocabulary from nearby code, tests, schemas, and public contracts. Name by role rather than container type or processing stage. Use specific domain names when a value has several plausible meanings or travels through a non-trivial scope.
-
-Generic or short names are not automatically wrong. `i`, `req`, `res`, `err`, `ctx`, `tx`, `db`, `response`, or `result` can be clear in a small conventional scope. Avoid template chains such as `data` → `processedData` → `finalResult`, vague architecture nouns, invented domain terms, and sentence-long identifiers. Do not rename unrelated code to satisfy this guidance.
-
-Let names, types, and structure explain operations. Use comments or docstrings for information code cannot express: rationale, non-obvious invariants, external quirks, public contracts, compatibility or security constraints, and deliberate trade-offs.
-
-Before adding a comment, remove it mentally: what important fact would the next maintainer lose? If it only narrates the next line, repeats a function name, announces a section, advertises quality, or patches a weak identifier, improve the code or omit it. Do not invent a plausible why. Follow repository conventions for public API documentation; do not add docstrings to every private helper for visual completeness.
-
-## Test and report honestly
-
-Test observable behavior and meaningful failure paths with the repository's existing setup. For a bug, add a regression test when practical. Do not mirror implementation, mock away the failure, weaken existing expectations, install a new test framework for one patch, or omit necessary coverage to keep the diff short.
-
-Complete the requested artifact before writing the handoff. Report only the checks you ran and their real outcomes. Distinguish inspected, inferred, and unverified facts. Keep the handoff proportional: changed behavior, material assumption, verification, and any limitation that affects confidence. Omit feature tours, generic quality claims, repeated summaries, and unsolicited roadmaps.
-
-## Final review
-
-Before finishing, ask:
-
-- Is the requested behavior complete and correct?
-- Are changed trust, lifecycle, and resource boundaries safe?
-- Does reuse match semantics and repository convention?
-- Is every new concept justified by a current need?
-- Would removing any remaining code, test, or comment lose important behavior or context?
-- Are names precise for their scope without becoming theatrical?
-- Do verification claims match evidence?
-
-## License
-
-MIT
+In the handoff, state the changed behavior, checks actually run and their outcomes, and limitations affecting confidence. Distinguish inspection from execution. Do not turn missing verification into unsolicited advice or next steps. Omit generic quality claims and repeated summaries.

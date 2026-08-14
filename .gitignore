@@ -1,0 +1,4 @@
+node_modules/
+report-result/
+agent-skills-workspace/
+*.log

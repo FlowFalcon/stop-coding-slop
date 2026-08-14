@@ -1,0 +1,4 @@
+interface:
+  display_name: "Stop Coding Slop"
+  short_description: "Plan first, then make a simple surgical diff"
+  default_prompt: "Use $stop-coding-slop to define success first, then implement the simplest complete change as a surgical, verified diff."
